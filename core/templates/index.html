@@ -449,7 +449,10 @@ let lastTimestamp = null;
 
 async function fetchLiveData() {
     try {
-        const response = await fetch("/api/data/");
+        const response = await fetch(`/api/data/?t=${Date.now()}`, {
+            cache: "no-store"
+        });
+
         const jsonData = await response.json();
         const esp32 = jsonData["esp32_0"];
         if (!esp32) return;
@@ -457,26 +460,29 @@ async function fetchLiveData() {
         // Update cards
         document.getElementById("temp").innerText = esp32.Temperature ?? "--";
         document.getElementById("hum").innerText = esp32.Humidity ?? "--";
-        document.getElementById("light").innerText = esp32["Light Sensor"] ?? "--";
+        document.getElementById("light").innerText = esp32.Light ?? "--";
         document.getElementById("time").innerText = esp32.timestamp ?? "--";
 
-        // Table update
+        // Table update (only when new data arrives)
         if (esp32.timestamp !== lastTimestamp) {
             lastTimestamp = esp32.timestamp;
 
             const tbody = document.getElementById("sensor-table-body");
-
             const row = document.createElement("tr");
+
             row.innerHTML = `
                 <td>${esp32.timestamp}</td>
                 <td>${esp32.Temperature ?? "—"}</td>
                 <td>${esp32.Humidity ?? "—"}</td>
-                <td>${esp32["Light Sensor"] ?? "—"}</td>
+                <td>${esp32.Light ?? "—"}</td>
             `;
 
             if (tbody.textContent.includes("Waiting")) tbody.innerHTML = "";
             tbody.prepend(row);
-            if (tbody.children.length > 20) tbody.removeChild(tbody.lastChild);
+
+            if (tbody.children.length > 20) {
+                tbody.removeChild(tbody.lastChild);
+            }
         }
 
     } catch (err) {
@@ -485,7 +491,7 @@ async function fetchLiveData() {
 }
 
 fetchLiveData();
-setInterval(fetchLiveData, 5000);
+setInterval(fetchLiveData, 2000); // every 2 seconds
 </script>
 
 <!-- ================= CHART SCRIPT ================= -->
@@ -510,7 +516,10 @@ const humChart   = createChart("humChart", "Humidity", "blue", "%");
 const lightChart = createChart("lightChart", "Light Sensor", "green", "Value");
 
 async function loadGraphs() {
-    const res = await fetch("/api/graph-data/");
+    const res = await fetch(`/api/graph-data/?t=${Date.now()}`, {
+        cache: "no-store"
+    });
+
     const data = await res.json();
     if (!data.labels?.length) return;
 

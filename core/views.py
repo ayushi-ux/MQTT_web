@@ -122,18 +122,18 @@ from .models import MqttLog
 # ======================================================
 # 1. LATEST SENSOR DATA (FOR DASHBOARD CARDS)
 # ======================================================
-from django.http import JsonResponse
-from django.utils import timezone
+# from django.http import JsonResponse
+# from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.db import connection   # 👈 REQUIRED
-from .models import MqttLog
+# from .models import MqttLog
 
 @never_cache
 def mqtt_data(request):
     # 🔥 Force Django to reopen DB connection
     connection.close()
 
-    log = MqttLog.objects.order_by("-timestamp").first()
+    log = MqttLog.objects.order_by("-id").first()
 
     if not log:
         return JsonResponse({})
@@ -167,7 +167,7 @@ def graph_data(request):
     connection.close()
 
     logs = list(
-        MqttLog.objects.order_by("-timestamp")[:300]
+        MqttLog.objects.order_by("-id")[:300]
     )[::-1]   # reverse for correct time order
 
     buckets = defaultdict(lambda: {
@@ -209,7 +209,7 @@ def graph_data(request):
 # 4. TABLE VIEW (LAST 100 ROWS)
 # ======================================================
 def continuous_data(request):
-    logs = MqttLog.objects.order_by("-timestamp")[:100]
+    logs = MqttLog.objects.order_by("-id")[:100]
 
     rows = []
     for log in logs:
@@ -228,7 +228,7 @@ def continuous_data(request):
 # 5. API FOR LIVE AUTO-REFRESH (OPTIONAL)
 # ======================================================
 def live_sensor_data(request):
-    logs = MqttLog.objects.order_by("-timestamp")[:100]
+    logs = MqttLog.objects.order_by("-id")[:100]
 
     data = []
     for log in logs:

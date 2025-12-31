@@ -122,10 +122,17 @@ from .models import MqttLog
 # ======================================================
 # 1. LATEST SENSOR DATA (FOR DASHBOARD CARDS)
 # ======================================================
+from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.cache import never_cache
+from django.db import connection   # 👈 REQUIRED
+from .models import MqttLog
 
 @never_cache
 def mqtt_data(request):
+    # 🔥 Force Django to reopen DB connection
+    connection.close()
+
     log = MqttLog.objects.order_by("-timestamp").first()
 
     if not log:
@@ -133,7 +140,7 @@ def mqtt_data(request):
 
     payload = log.payload or {}
 
-    response = JsonResponse({
+    return JsonResponse({
         "esp32_0": {
             "Temperature": payload.get("Temperature"),
             "Humidity": payload.get("Humidity"),
@@ -141,9 +148,6 @@ def mqtt_data(request):
             "timestamp": timezone.localtime(log.timestamp).strftime("%Y-%m-%d %H:%M:%S")
         }
     })
-
-    response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    return response
 
 
 # ======================================================
@@ -156,8 +160,12 @@ def index(request):
 # ======================================================
 # 3. GRAPH DATA (LIMITED + SAFE)
 # ======================================================
+
 @never_cache
 def graph_data(request):
+    # 🔥 FORCE fresh DB connection
+    connection.close()
+
     logs = list(
         MqttLog.objects.order_by("-timestamp")[:300]
     )[::-1]   # reverse for correct time order

@@ -1,0 +1,5 @@
+Django
+paho-mqtt
+gunicorn
+psycopg2
+python-dotenv

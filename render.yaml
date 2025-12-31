@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mqtt-django-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn mqtt_web.wsgi
+    plan: free
+
+  - type: worker
+    name: mqtt-worker
+    env: python
+    startCommand: python manage.py mqtt_worker
+    plan: free

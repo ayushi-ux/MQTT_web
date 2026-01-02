@@ -83,14 +83,15 @@ WSGI_APPLICATION = 'mqtt_web.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
+import dj_database_url
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"postgresql://postgres:2004@127.0.0.1:5432/mqtt_django_db",
+    "default": dj_database_url.config(
+        default="postgresql://postgres:2004@127.0.0.1:5432/mqtt_django_db",
         conn_max_age=600,
-        ssl_require=False
+        ssl_require=False,
     )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

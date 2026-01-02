@@ -25,12 +25,17 @@ load_dotenv(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY not set in environment")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+]
 
 # Application definition
 
@@ -79,9 +84,10 @@ WSGI_APPLICATION = 'mqtt_web.wsgi.application'
 
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    'default': dj_database_url.config(
+        default=f"postgresql://postgres:2004@127.0.0.1:5432/mqtt_django_db",
         conn_max_age=600,
+        ssl_require=False
     )
 }
 
@@ -122,6 +128,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = []
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

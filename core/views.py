@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .mqtt_client import latest_data
+
 from .models import MqttLog   # 👈 ADD THIS IMPORT
 
 

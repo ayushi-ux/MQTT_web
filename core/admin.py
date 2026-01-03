@@ -1,3 +1,11 @@
 from django.contrib import admin
+from django.contrib import admin
+from .models import MqttLog
 
-# Register your models here.
+
+@admin.register(MqttLog)
+class MqttLogAdmin(admin.ModelAdmin):
+    list_display = ("topic", "timestamp")
+    list_filter = ("topic",)
+    search_fields = ("topic",)
+    ordering = ("-timestamp",)
